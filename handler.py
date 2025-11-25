@@ -506,6 +506,12 @@ if __name__ == "__main__":
     try:
         # Start RunPod serverless worker
         print("Starting RunPod serverless worker...")
-        runpod.serverless.start({"handler": handler})
+        runpod.serverless.start({
+            "handler": handler,
+            "rp_serve_api": True,
+            "rp_api_host": "0.0.0.0",
+            "rp_api_port": 8000,
+            "rp_api_concurrency": 1
+        })
     finally:
         stop_comfyui()
