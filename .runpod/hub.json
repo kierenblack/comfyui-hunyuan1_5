@@ -6,7 +6,7 @@
   "iconUrl": "https://raw.githubusercontent.com/comfyanonymous/ComfyUI/master/web/icon.png",
   "config": {
     "runsOn": "GPU",
-    "containerDiskInGb": 40,
+    "containerDiskInGb": 60,
     "presets": [
       {
         "name": "Default (720x1280)",
