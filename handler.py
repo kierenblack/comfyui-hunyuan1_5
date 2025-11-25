@@ -333,9 +333,12 @@ def create_default_workflow(input_image, prompt="", negative_prompt="", seed=Non
     return workflow
 
 
-def handler(event):
+def handler(job):
     """
-    RunPod handler function
+    RunPod Serverless Handler Function
+    
+    This is the main handler function that RunPod calls for each job.
+    It receives a job dictionary with 'id' and 'input' fields.
     
     Expected input format:
     {
@@ -355,84 +358,131 @@ def handler(event):
             "shift": 7  # Optional, default 7
         }
     }
+    
+    Returns:
+    - Success: {"status": "success", "prompt_id": str, "outputs": list}
+    - Error: {"error": str}
     """
+    job_input = job.get("input", {})
+    
     try:
-        input_data = event.get("input", {})
-        
-        # Get input image - support both 'image' and 'image_url'
-        image_input = input_data.get("image")
-        image_url = input_data.get("image_url")
+        # Validate input
+        image_input = job_input.get("image")
+        image_url = job_input.get("image_url")
         
         if not image_input and not image_url:
-            return {"error": "No image or image_url provided"}
+            return {"error": "No image or image_url provided. Please provide either 'image' (base64) or 'image_url' (URL string)."}
+        
+        print(f"Processing job: {job.get('id', 'unknown')}")
         
         # Handle URL or base64 image
         if image_url:
-            # Use image_url if provided
-            response = requests.get(image_url)
-            image_data = response.content
-        elif image_input.startswith("http://") or image_input.startswith("https://"):
+            print(f"Downloading image from URL: {image_url}")
+            try:
+                response = requests.get(image_url, timeout=30)
+                response.raise_for_status()
+                image_data = response.content
+            except requests.RequestException as e:
+                return {"error": f"Failed to download image from URL: {str(e)}"}
+        elif isinstance(image_input, str) and (image_input.startswith("http://") or image_input.startswith("https://")):
             # Fallback to image field if it's a URL
-            response = requests.get(image_input)
-            image_data = response.content
+            print(f"Downloading image from URL (image field): {image_input}")
+            try:
+                response = requests.get(image_input, timeout=30)
+                response.raise_for_status()
+                image_data = response.content
+            except requests.RequestException as e:
+                return {"error": f"Failed to download image from URL: {str(e)}"}
         else:
             # Base64 encoded image
             image_data = image_input
         
-        # Upload image
-        input_filename = upload_image(image_data)
-        print(f"Uploaded image: {input_filename}")
+        # Upload image to ComfyUI
+        try:
+            input_filename = upload_image(image_data)
+            print(f"Uploaded image: {input_filename}")
+        except Exception as e:
+            return {"error": f"Failed to upload image: {str(e)}"}
         
         # Get or create workflow
-        workflow = input_data.get("workflow")
+        workflow = job_input.get("workflow")
         if not workflow:
-            workflow = create_default_workflow(
-                input_image=input_filename,
-                prompt=input_data.get("prompt", ""),
-                negative_prompt=input_data.get("negative_prompt", ""),
-                seed=input_data.get("seed"),
-                num_frames=input_data.get("num_frames", 25),
-                fps=input_data.get("fps", 24),
-                steps=input_data.get("steps", 20),
-                cfg=input_data.get("cfg", 1),
-                width=input_data.get("width", 720),
-                height=input_data.get("height", 1280),
-                shift=input_data.get("shift", 7)
-            )
+            try:
+                workflow = create_default_workflow(
+                    input_image=input_filename,
+                    prompt=job_input.get("prompt", ""),
+                    negative_prompt=job_input.get("negative_prompt", ""),
+                    seed=job_input.get("seed"),
+                    num_frames=job_input.get("num_frames", 25),
+                    fps=job_input.get("fps", 24),
+                    steps=job_input.get("steps", 20),
+                    cfg=job_input.get("cfg", 1),
+                    width=job_input.get("width", 720),
+                    height=job_input.get("height", 1280),
+                    shift=job_input.get("shift", 7)
+                )
+            except Exception as e:
+                return {"error": f"Failed to create workflow: {str(e)}"}
         
         # Queue the workflow
-        print("Queueing workflow...")
-        queue_result = queue_prompt(workflow)
-        
-        if "error" in queue_result:
-            return {"error": f"Failed to queue workflow: {queue_result['error']}"}
-        
-        prompt_id = queue_result.get("prompt_id")
-        print(f"Workflow queued with ID: {prompt_id}")
+        print("Queueing workflow in ComfyUI...")
+        try:
+            queue_result = queue_prompt(workflow)
+            
+            if "error" in queue_result:
+                return {"error": f"Failed to queue workflow: {queue_result['error']}"}
+            
+            prompt_id = queue_result.get("prompt_id")
+            if not prompt_id:
+                return {"error": "No prompt_id returned from ComfyUI"}
+                
+            print(f"Workflow queued with ID: {prompt_id}")
+        except Exception as e:
+            return {"error": f"Failed to queue workflow: {str(e)}"}
         
         # Wait for completion
         print("Waiting for workflow to complete...")
-        history_entry = wait_for_completion(prompt_id)
+        try:
+            history_entry = wait_for_completion(prompt_id, timeout=600)
+        except TimeoutError as e:
+            return {"error": f"Workflow execution timed out: {str(e)}"}
+        except Exception as e:
+            return {"error": f"Error during workflow execution: {str(e)}"}
         
         # Get output files
-        output_files = get_output_files(history_entry)
-        print(f"Generated {len(output_files)} output files")
+        try:
+            output_files = get_output_files(history_entry)
+            print(f"Generated {len(output_files)} output files")
+            
+            if not output_files:
+                return {"error": "No output files generated"}
+        except Exception as e:
+            return {"error": f"Failed to get output files: {str(e)}"}
         
         # Prepare results
         results = []
         for output in output_files:
-            file_data = get_file_as_base64(
-                output["filename"],
-                output["subfolder"],
-                output["type_name"]
-            )
-            
-            if file_data:
-                results.append({
-                    "type": output["type"],
-                    "filename": output["filename"],
-                    "data": file_data
-                })
+            try:
+                file_data = get_file_as_base64(
+                    output["filename"],
+                    output["subfolder"],
+                    output["type_name"]
+                )
+                
+                if file_data:
+                    results.append({
+                        "type": output["type"],
+                        "filename": output["filename"],
+                        "data": file_data
+                    })
+                else:
+                    print(f"Warning: Could not read file {output['filename']}")
+            except Exception as e:
+                print(f"Error reading output file {output.get('filename', 'unknown')}: {str(e)}")
+                continue
+        
+        if not results:
+            return {"error": "Failed to read any output files"}
         
         return {
             "status": "success",
@@ -441,10 +491,10 @@ def handler(event):
         }
         
     except Exception as e:
-        print(f"Error in handler: {str(e)}")
+        print(f"Unhandled error in handler: {str(e)}")
         import traceback
         traceback.print_exc()
-        return {"error": str(e)}
+        return {"error": f"Internal error: {str(e)}"}
 
 
 if __name__ == "__main__":
