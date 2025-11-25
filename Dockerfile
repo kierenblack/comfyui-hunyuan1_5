@@ -76,4 +76,6 @@ ENV COMFYUI_PATH=/app/ComfyUI
 EXPOSE 8188
 
 # Run builder script on container start to download models
-CMD ["/bin/bash", "-c", "./builder.sh && python handler.py"]
+# For RunPod, handler.py will run automatically
+# For local testing, keep the container alive
+CMD ["/bin/bash", "-c", "./builder.sh && python handler.py --rp_serve_api"]

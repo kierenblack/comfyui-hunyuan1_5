@@ -1,0 +1,9 @@
+{
+  "input": {
+    "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
+    "prompt": "smooth cinematic motion, high quality",
+    "num_frames": 16,
+    "fps": 24,
+    "steps": 15
+  }
+}
