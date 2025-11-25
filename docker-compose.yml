@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  comfyui-hunyuan:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: comfyui-hunyuan-video
+    ports:
+      - "8188:8188"
+      - "8000:8000"
+    volumes:
+      - ./models:/app/ComfyUI/models
+      - ./input:/app/ComfyUI/input
+      - ./output:/app/ComfyUI/output
+      - ./custom_nodes:/app/ComfyUI/custom_nodes
+    environment:
+      - COMFYUI_PATH=/app/ComfyUI
+      - HUNYUAN_MODEL_URL=${HUNYUAN_MODEL_URL:-}
+      - CLIP_MODEL_URL=${CLIP_MODEL_URL:-}
+      - VAE_MODEL_URL=${VAE_MODEL_URL:-}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    stdin_open: true
+    tty: true

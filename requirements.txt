@@ -1,0 +1,4 @@
+# Python dependencies for RunPod Serverless Handler
+runpod>=1.5.0
+requests>=2.31.0
+Pillow>=10.0.0

@@ -1,0 +1,44 @@
+# Ignore common files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+
+# Docker
+.dockerignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Model files (too large for git)
+models/
+*.safetensors
+*.ckpt
+*.pth
+*.bin
+
+# Output files
+output/
+input/
+*.mp4
+*.avi
+*.mov
+*.gif
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Custom nodes (manage separately)
+custom_nodes/
