@@ -47,58 +47,39 @@ else
     echo "Downloading Hunyuan Video 1.5 Models"
     echo "=========================================="
     
-    # Note: Set these environment variables with actual model URLs
-    # Models required by the workflow:
+    # Set default URLs from Hugging Face if not provided
+    : ${HUNYUAN_UNET_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/diffusion_models/hunyuanvideo1.5_720p_i2v_cfg_distilled_fp8_scaled.safetensors"}
+    : ${HUNYUAN_VAE_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/vae/hunyuanvideo15_vae_fp16.safetensors"}
+    : ${CLIP1_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors"}
+    : ${CLIP2_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/byt5_small_glyphxl_fp16.safetensors"}
+    : ${CLIP_VISION_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/clip_vision/sigclip_vision_patch14_384.safetensors"}
+    
+    echo "📥 Downloading models from Hugging Face..."
+    echo "   This may take a while (~30GB total download)"
+    echo ""
     
     # 1. Main UNet Model (distilled FP8)
-    if [ ! -z "$HUNYUAN_UNET_URL" ]; then
-        echo "Downloading Hunyuan Video UNet model..."
-        mkdir -p "${MODELS_DIR}/diffusion_models"
-        download_with_retry "$HUNYUAN_UNET_URL" "${MODELS_DIR}/diffusion_models/hunyuanvideo1.5_720p_i2v_cfg_distilled_fp8_scaled.safetensors"
-    else
-        echo "⚠️  HUNYUAN_UNET_URL not set."
-        echo "   Required: hunyuanvideo1.5_720p_i2v_cfg_distilled_fp8_scaled.safetensors"
-        echo "   Place in: ${MODELS_DIR}/diffusion_models/"
-    fi
+    echo "Downloading Hunyuan Video UNet model (~16GB)..."
+    mkdir -p "${MODELS_DIR}/diffusion_models"
+    download_with_retry "$HUNYUAN_UNET_URL" "${MODELS_DIR}/diffusion_models/hunyuanvideo1.5_720p_i2v_cfg_distilled_fp8_scaled.safetensors"
     
     # 2. VAE Model
-    if [ ! -z "$HUNYUAN_VAE_URL" ]; then
-        echo "Downloading VAE model..."
-        download_with_retry "$HUNYUAN_VAE_URL" "${MODELS_DIR}/vae/hunyuanvideo15_vae_fp16.safetensors"
-    else
-        echo "⚠️  HUNYUAN_VAE_URL not set."
-        echo "   Required: hunyuanvideo15_vae_fp16.safetensors"
-        echo "   Place in: ${MODELS_DIR}/vae/"
-    fi
+    echo "Downloading VAE model (~2GB)..."
+    download_with_retry "$HUNYUAN_VAE_URL" "${MODELS_DIR}/vae/hunyuanvideo15_vae_fp16.safetensors"
     
     # 3. CLIP Text Encoders
-    if [ ! -z "$CLIP1_URL" ]; then
-        echo "Downloading CLIP model 1 (Qwen)..."
-        download_with_retry "$CLIP1_URL" "${MODELS_DIR}/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors"
-    else
-        echo "⚠️  CLIP1_URL not set."
-        echo "   Required: qwen_2.5_vl_7b_fp8_scaled.safetensors"
-        echo "   Place in: ${MODELS_DIR}/text_encoders/"
-    fi
+    echo "Downloading CLIP model 1 (Qwen, ~8GB)..."
+    download_with_retry "$CLIP1_URL" "${MODELS_DIR}/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors"
     
-    if [ ! -z "$CLIP2_URL" ]; then
-        echo "Downloading CLIP model 2 (ByT5)..."
-        download_with_retry "$CLIP2_URL" "${MODELS_DIR}/text_encoders/byt5_small_glyphxl_fp16.safetensors"
-    else
-        echo "⚠️  CLIP2_URL not set."
-        echo "   Required: byt5_small_glyphxl_fp16.safetensors"
-        echo "   Place in: ${MODELS_DIR}/text_encoders/"
-    fi
+    echo "Downloading CLIP model 2 (ByT5, ~500MB)..."
+    download_with_retry "$CLIP2_URL" "${MODELS_DIR}/text_encoders/byt5_small_glyphxl_fp16.safetensors"
     
     # 4. CLIP Vision Model
-    if [ ! -z "$CLIP_VISION_URL" ]; then
-        echo "Downloading CLIP Vision model..."
-        download_with_retry "$CLIP_VISION_URL" "${MODELS_DIR}/clip_vision/sigclip_vision_patch14_384.safetensors"
-    else
-        echo "⚠️  CLIP_VISION_URL not set."
-        echo "   Required: sigclip_vision_patch14_384.safetensors"
-        echo "   Place in: ${MODELS_DIR}/clip_vision/"
-    fi
+    echo "Downloading CLIP Vision model (~1GB)..."
+    download_with_retry "$CLIP_VISION_URL" "${MODELS_DIR}/clip_vision/sigclip_vision_patch14_384.safetensors"
+    
+    echo ""
+    echo "✅ All models downloaded successfully!"
     
     # Mark as downloaded
     mkdir -p "${MODELS_DIR}/diffusion_models"
