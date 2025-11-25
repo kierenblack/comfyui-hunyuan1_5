@@ -40,7 +40,7 @@ download_with_retry() {
 }
 
 # Check if models already exist (for faster rebuilds)
-if [ -f "${MODELS_DIR}/hunyuan/.downloaded" ]; then
+if [ -f "${MODELS_DIR}/diffusion_models/.downloaded" ]; then
     echo "Models already downloaded, skipping..."
 else
     echo "=========================================="
@@ -101,7 +101,8 @@ else
     fi
     
     # Mark as downloaded
-    touch "${MODELS_DIR}/hunyuan/.downloaded"
+    mkdir -p "${MODELS_DIR}/diffusion_models"
+    touch "${MODELS_DIR}/diffusion_models/.downloaded"
 fi
 
 echo "=========================================="
