@@ -1,3 +1,5 @@
+[![Runpod](https://api.runpod.io/badge/kierenblack/comfyui-hunyuan1_5)](https://console.runpod.io/hub/kierenblack/comfyui-hunyuan1_5)
+
 # ComfyUI Hunyuan 1.5 Video - RunPod Serverless
 
 This repository contains a complete RunPod serverless deployment for ComfyUI with Hunyuan 1.5 Video support, enabling image-to-video (img2vid) generation.
