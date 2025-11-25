@@ -1,0 +1,94 @@
+{
+  "title": "ComfyUI Hunyuan 1.5 Video",
+  "description": "Image-to-video generation using Hunyuan 1.5 Video models in ComfyUI. Generate high-quality videos from single images with customizable parameters.",
+  "type": "serverless",
+  "category": "video",
+  "iconUrl": "https://raw.githubusercontent.com/comfyanonymous/ComfyUI/master/web/icon.png",
+  "config": {
+    "runsOn": "GPU",
+    "containerDiskInGb": 40,
+    "presets": [
+      {
+        "name": "Default (720x1280)",
+        "defaults": {
+          "WIDTH": "720",
+          "HEIGHT": "1280",
+          "NUM_FRAMES": "25",
+          "FPS": "24",
+          "STEPS": "20"
+        }
+      },
+      {
+        "name": "Quick Generation",
+        "defaults": {
+          "WIDTH": "720",
+          "HEIGHT": "1280",
+          "NUM_FRAMES": "16",
+          "FPS": "24",
+          "STEPS": "15"
+        }
+      },
+      {
+        "name": "High Quality",
+        "defaults": {
+          "WIDTH": "720",
+          "HEIGHT": "1280",
+          "NUM_FRAMES": "49",
+          "FPS": "24",
+          "STEPS": "30"
+        }
+      }
+    ],
+    "env": [
+      {
+        "key": "COMFYUI_PATH",
+        "value": "/app/ComfyUI"
+      },
+      {
+        "key": "HUNYUAN_UNET_URL",
+        "input": {
+          "name": "UNet Model URL",
+          "type": "string",
+          "description": "Direct download URL for Hunyuan Video UNet model (optional if using network volume)",
+          "default": ""
+        }
+      },
+      {
+        "key": "HUNYUAN_VAE_URL",
+        "input": {
+          "name": "VAE Model URL",
+          "type": "string",
+          "description": "Direct download URL for VAE model (optional if using network volume)",
+          "default": ""
+        }
+      },
+      {
+        "key": "CLIP1_URL",
+        "input": {
+          "name": "CLIP 1 Model URL",
+          "type": "string",
+          "description": "Direct download URL for Qwen CLIP model (optional if using network volume)",
+          "default": ""
+        }
+      },
+      {
+        "key": "CLIP2_URL",
+        "input": {
+          "name": "CLIP 2 Model URL",
+          "type": "string",
+          "description": "Direct download URL for ByT5 CLIP model (optional if using network volume)",
+          "default": ""
+        }
+      },
+      {
+        "key": "CLIP_VISION_URL",
+        "input": {
+          "name": "CLIP Vision Model URL",
+          "type": "string",
+          "description": "Direct download URL for CLIP Vision model (optional if using network volume)",
+          "default": ""
+        }
+      }
+    ]
+  }
+}
