@@ -1,4 +1,5 @@
 # Dockerfile for ComfyUI with Hunyuan 1.5 Video Support on RunPod Serverless
+# Base image: PyTorch 2.2.1 with CUDA 12.1 on Ubuntu 22.04
 FROM runpod/pytorch:2.2.1-py3.10-cuda12.1.1-devel-ubuntu22.04
 
 # Set working directory
