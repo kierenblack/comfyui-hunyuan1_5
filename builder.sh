@@ -7,14 +7,33 @@ echo "Starting ComfyUI setup for Hunyuan 1.5 Video"
 echo "=========================================="
 
 COMFYUI_PATH="/app/ComfyUI"
+
+# Check if RunPod network volume is mounted
+NETWORK_VOLUME=""
+if [ -d "/runpod-volume" ]; then
+    NETWORK_VOLUME="/runpod-volume"
+    echo "✓ Network volume detected at: /runpod-volume"
+else
+    echo "⚠ No network volume detected at /runpod-volume"
+fi
+
+# Always use ComfyUI's models directory
 MODELS_DIR="${COMFYUI_PATH}/models"
 
-# Create necessary directories based on Hunyuan 1.5 requirements
+# Create necessary directories
 mkdir -p "${MODELS_DIR}/diffusion_models"
 mkdir -p "${MODELS_DIR}/text_encoders"
 mkdir -p "${MODELS_DIR}/vae"
 mkdir -p "${MODELS_DIR}/unet"
 mkdir -p "${MODELS_DIR}/clip_vision"
+
+# If network volume exists, create same structure there
+if [ -n "$NETWORK_VOLUME" ]; then
+    mkdir -p "${NETWORK_VOLUME}/diffusion_models"
+    mkdir -p "${NETWORK_VOLUME}/text_encoders"
+    mkdir -p "${NETWORK_VOLUME}/vae"
+    mkdir -p "${NETWORK_VOLUME}/clip_vision"
+fi
 
 # Function to download file with retries
 download_with_retry() {
@@ -39,52 +58,65 @@ download_with_retry() {
     return 1
 }
 
-# Check if models already exist (for faster rebuilds)
-if [ -f "${MODELS_DIR}/diffusion_models/.downloaded" ]; then
-    echo "Models already downloaded, skipping..."
-else
-    echo "=========================================="
-    echo "Downloading Hunyuan Video 1.5 Models"
-    echo "=========================================="
+# Set default URLs from Hugging Face if not provided
+: ${HUNYUAN_UNET_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/diffusion_models/hunyuanvideo1.5_720p_i2v_cfg_distilled_fp8_scaled.safetensors"}
+: ${HUNYUAN_VAE_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/vae/hunyuanvideo15_vae_fp16.safetensors"}
+: ${CLIP1_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors"}
+: ${CLIP2_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/byt5_small_glyphxl_fp16.safetensors"}
+: ${CLIP_VISION_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/clip_vision/sigclip_vision_patch14_384.safetensors"}
+
+echo "=========================================="
+echo "Checking and downloading models"
+echo "=========================================="
+
+# Function to check and download model if needed
+download_model_if_needed() {
+    local url=$1
+    local filename=$2
+    local subdir=$3
+    local name=$4
     
-    # Set default URLs from Hugging Face if not provided
-    : ${HUNYUAN_UNET_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/diffusion_models/hunyuanvideo1.5_720p_i2v_cfg_distilled_fp8_scaled.safetensors"}
-    : ${HUNYUAN_VAE_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/vae/hunyuanvideo15_vae_fp16.safetensors"}
-    : ${CLIP1_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors"}
-    : ${CLIP2_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/text_encoders/byt5_small_glyphxl_fp16.safetensors"}
-    : ${CLIP_VISION_URL:="https://huggingface.co/Comfy-Org/HunyuanVideo_1.5_repackaged/resolve/main/split_files/clip_vision/sigclip_vision_patch14_384.safetensors"}
+    local comfyui_path="${MODELS_DIR}/${subdir}/${filename}"
+    local network_path="${NETWORK_VOLUME}/${subdir}/${filename}"
     
-    echo "📥 Downloading models from Hugging Face..."
-    echo "   This may take a while (~30GB total download)"
-    echo ""
+    # Check if model exists in network volume first
+    if [ -n "$NETWORK_VOLUME" ] && [ -f "$network_path" ]; then
+        echo "✓ $name found in network volume, copying to ComfyUI..."
+        cp "$network_path" "$comfyui_path"
+        return 0
+    fi
     
-    # 1. Main UNet Model (distilled FP8)
-    echo "Downloading Hunyuan Video UNet model (~16GB)..."
-    mkdir -p "${MODELS_DIR}/diffusion_models"
-    download_with_retry "$HUNYUAN_UNET_URL" "${MODELS_DIR}/diffusion_models/hunyuanvideo1.5_720p_i2v_cfg_distilled_fp8_scaled.safetensors"
+    # Check if model already exists in ComfyUI
+    if [ -f "$comfyui_path" ]; then
+        echo "✓ $name already exists in ComfyUI"
+        # Copy to network volume for next time
+        if [ -n "$NETWORK_VOLUME" ]; then
+            echo "  Saving to network volume for future use..."
+            cp "$comfyui_path" "$network_path"
+        fi
+        return 0
+    fi
     
-    # 2. VAE Model
-    echo "Downloading VAE model (~2GB)..."
-    download_with_retry "$HUNYUAN_VAE_URL" "${MODELS_DIR}/vae/hunyuanvideo15_vae_fp16.safetensors"
-    
-    # 3. CLIP Text Encoders
-    echo "Downloading CLIP model 1 (Qwen, ~8GB)..."
-    download_with_retry "$CLIP1_URL" "${MODELS_DIR}/text_encoders/qwen_2.5_vl_7b_fp8_scaled.safetensors"
-    
-    echo "Downloading CLIP model 2 (ByT5, ~500MB)..."
-    download_with_retry "$CLIP2_URL" "${MODELS_DIR}/text_encoders/byt5_small_glyphxl_fp16.safetensors"
-    
-    # 4. CLIP Vision Model
-    echo "Downloading CLIP Vision model (~1GB)..."
-    download_with_retry "$CLIP_VISION_URL" "${MODELS_DIR}/clip_vision/sigclip_vision_patch14_384.safetensors"
-    
-    echo ""
-    echo "✅ All models downloaded successfully!"
-    
-    # Mark as downloaded
-    mkdir -p "${MODELS_DIR}/diffusion_models"
-    touch "${MODELS_DIR}/diffusion_models/.downloaded"
-fi
+    # Download to ComfyUI and save to network volume
+    echo "Downloading $name..."
+    mkdir -p "$(dirname "$comfyui_path")"
+    if download_with_retry "$url" "$comfyui_path"; then
+        if [ -n "$NETWORK_VOLUME" ]; then
+            echo "  Saving to network volume..."
+            cp "$comfyui_path" "$network_path"
+        fi
+    fi
+}
+
+# Download each model if it doesn't exist
+download_model_if_needed "$HUNYUAN_UNET_URL" "hunyuanvideo1.5_720p_i2v_cfg_distilled_fp8_scaled.safetensors" "diffusion_models" "Hunyuan Video UNet model (~16GB)"
+download_model_if_needed "$HUNYUAN_VAE_URL" "hunyuanvideo15_vae_fp16.safetensors" "vae" "VAE model (~2GB)"
+download_model_if_needed "$CLIP1_URL" "qwen_2.5_vl_7b_fp8_scaled.safetensors" "text_encoders" "CLIP model 1 (Qwen, ~8GB)"
+download_model_if_needed "$CLIP2_URL" "byt5_small_glyphxl_fp16.safetensors" "text_encoders" "CLIP model 2 (ByT5, ~500MB)"
+download_model_if_needed "$CLIP_VISION_URL" "sigclip_vision_patch14_384.safetensors" "clip_vision" "CLIP Vision model (~1GB)"
+
+echo ""
+echo "✅ All models ready!"
 
 echo "=========================================="
 echo "Setting up custom nodes"
