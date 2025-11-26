@@ -363,6 +363,11 @@ def handler(job):
     - Success: {"status": "success", "prompt_id": str, "outputs": list}
     - Error: {"error": str}
     """
+    print("=" * 60)
+    print("HANDLER CALLED - NEW REQUEST RECEIVED")
+    print(f"Job ID: {job.get('id', 'unknown')}")
+    print("=" * 60)
+    
     job_input = job.get("input", {})
     
     try:
