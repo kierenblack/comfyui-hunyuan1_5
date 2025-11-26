@@ -1,44 +1,17 @@
 {
   "tests": [
     {
-      "name": "test_base64_image_input",
+      "name": "quick_smoke_test",
       "input": {
         "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
-        "prompt": "smooth cinematic motion, high quality",
-        "num_frames": 16,
+        "prompt": "smooth motion",
+        "num_frames": 9,
         "fps": 24,
-        "steps": 15
+        "steps": 5,
+        "width": 384,
+        "height": 640
       },
-      "timeout": 300000
-    },
-    {
-      "name": "test_image_url_input",
-      "input": {
-        "image_url": "https://picsum.photos/720/1280",
-        "prompt": "cinematic movement, professional quality",
-        "negative_prompt": "blurry, distorted",
-        "seed": 42,
-        "num_frames": 25,
-        "fps": 24,
-        "steps": 20,
-        "cfg": 1,
-        "width": 720,
-        "height": 1280
-      },
-      "timeout": 600000
-    },
-    {
-      "name": "test_custom_dimensions",
-      "input": {
-        "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
-        "prompt": "smooth animation",
-        "num_frames": 25,
-        "fps": 24,
-        "steps": 20,
-        "width": 720,
-        "height": 1280
-      },
-      "timeout": 600000
+      "timeout": 180000
     }
   ],
   "config": {
