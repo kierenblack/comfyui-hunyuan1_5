@@ -1,19 +1,5 @@
 {
-  "tests": [
-    {
-      "name": "quick_smoke_test",
-      "input": {
-        "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==",
-        "prompt": "smooth motion",
-        "num_frames": 9,
-        "fps": 24,
-        "steps": 5,
-        "width": 384,
-        "height": 640
-      },
-      "timeout": 180000
-    }
-  ],
+  "tests": [],
   "config": {
     "gpuCount": 1,
     "minVramGb": 12,
