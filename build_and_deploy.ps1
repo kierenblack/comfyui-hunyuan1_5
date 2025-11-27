@@ -9,9 +9,9 @@ Write-Host ""
 # Check if Docker is installed
 try {
     docker --version | Out-Null
-    Write-Host "✓ Docker found" -ForegroundColor Green
+    Write-Host "Docker found" -ForegroundColor Green
 } catch {
-    Write-Host "❌ Docker not found. Please install Docker Desktop for Windows" -ForegroundColor Red
+    Write-Host "Docker not found. Please install Docker Desktop for Windows" -ForegroundColor Red
     Write-Host "Download from: https://www.docker.com/products/docker-desktop" -ForegroundColor Yellow
     exit 1
 }
@@ -46,7 +46,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host ""
-Write-Host "✓ Build successful" -ForegroundColor Green
+Write-Host "Build successful" -ForegroundColor Green
 Write-Host ""
 
 # Ask if want to push
@@ -71,7 +71,7 @@ if ($push -eq "y" -or $push -eq "Y") {
     }
     
     Write-Host ""
-    Write-Host "✓ Push successful" -ForegroundColor Green
+    Write-Host "Push successful" -ForegroundColor Green
     Write-Host ""
     Write-Host "========================================" -ForegroundColor Green
     Write-Host "Deployment Complete!" -ForegroundColor Green
@@ -83,7 +83,7 @@ if ($push -eq "y" -or $push -eq "Y") {
     Write-Host "1. Go to RunPod console"
     Write-Host "2. Update your endpoint to use: $fullTag"
     Write-Host "3. Save and redeploy"
-    Write-Host "4. Check logs for: 'INITIALIZING RUNPOD SERVERLESS WORKER'"
+    Write-Host "4. Check logs for: INITIALIZING RUNPOD SERVERLESS WORKER"
     Write-Host "5. Test with: python test_runpod_local.py"
     Write-Host ""
 } else {
