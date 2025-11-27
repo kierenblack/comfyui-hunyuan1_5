@@ -13,13 +13,28 @@ This repository contains a complete RunPod serverless deployment for ComfyUI wit
 - 📦 Automatic model downloading and setup
 - 🎯 Simple REST API interface
 
+## ⚠️ Important: Handler Fixes Applied
+
+**Recent changes to fix handler not being called issue:**
+1. ✅ Removed invalid `--rp_serve_api` flag from Dockerfile
+2. ✅ Added comprehensive debug logging
+3. ✅ Created test scripts for local verification
+
+**You MUST rebuild and redeploy for fixes to take effect!**
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for deployment instructions or run:
+```bash
+./build_and_deploy.sh
+```
+
 ## Quick Start
 
 ### Prerequisites
 
 - RunPod account with serverless endpoint setup
 - Docker installed (for local testing)
-- NVIDIA GPU with CUDA support
+- Docker Hub account (for deployment)
+- NVIDIA GPU with CUDA support (locally) or RunPod GPU
 - Hunyuan 1.5 Video model files (see Model Setup)
 
 ### Local Testing with Docker Compose
@@ -245,6 +260,19 @@ This deployment includes:
 
 ## Troubleshooting
 
+### Handler Not Being Called
+
+**Symptoms:** Endpoint starts successfully but requests never reach handler function
+
+**Solution:** See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for detailed debug guide
+
+**Quick checks:**
+1. Did you rebuild and redeploy after recent fixes? Run `./build_and_deploy.sh`
+2. Are you testing with the correct endpoint? Use `/runsync` or `/run` path
+3. Check logs for "INITIALIZING RUNPOD SERVERLESS WORKER" message
+4. Check logs for "HANDLER CALLED - NEW REQUEST RECEIVED" when sending requests
+5. Test locally first: `python handler.py` then `python test_runpod_local.py sync`
+
 ### Out of Memory Errors
 
 - Reduce `num_frames` (try 25 instead of 49)
@@ -253,8 +281,8 @@ This deployment includes:
 
 ### Slow Cold Starts
 
-- Use RunPod network volume for models
-- Pre-bake models into Docker image (increases image size)
+- Use RunPod network volume for models (reduces to 30-60 seconds)
+- Pre-bake models into Docker image (increases image size significantly)
 - Use keep-alive workers
 
 ### Model Not Found
@@ -262,13 +290,15 @@ This deployment includes:
 - Verify models are in correct directories
 - Check `builder.sh` output for download errors
 - Manually upload models to network volume
+- Check network volume is mounted correctly
 
 ### Video Quality Issues
 
 - Increase `steps` (30-50 recommended)
-- Adjust `cfg` scale (6-8 recommended)
+- Adjust `cfg` scale (6-8 recommended, or 1.0 for distilled model)
 - Provide detailed prompts
 - Ensure input image is high quality
+- Use higher resolution input images
 
 ## Performance Tips
 
