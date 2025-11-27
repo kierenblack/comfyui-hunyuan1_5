@@ -503,6 +503,10 @@ def handler(job):
 
 
 if __name__ == "__main__":
+    print("=" * 60)
+    print("INITIALIZING RUNPOD SERVERLESS WORKER")
+    print("=" * 60)
+    
     # Start ComfyUI server
     if not start_comfyui():
         print("Failed to start ComfyUI. Exiting.")
@@ -511,6 +515,14 @@ if __name__ == "__main__":
     try:
         # Start RunPod serverless worker
         print("Starting RunPod serverless worker...")
+        print(f"Handler function: {handler}")
+        print(f"Handler callable: {callable(handler)}")
         runpod.serverless.start({"handler": handler})
+    except KeyboardInterrupt:
+        print("Received shutdown signal")
+    except Exception as e:
+        print(f"Error starting serverless worker: {e}")
+        import traceback
+        traceback.print_exc()
     finally:
         stop_comfyui()

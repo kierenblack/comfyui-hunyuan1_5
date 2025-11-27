@@ -72,10 +72,9 @@ RUN mkdir -p /app/ComfyUI/models/checkpoints \
 ENV PYTHONUNBUFFERED=1
 ENV COMFYUI_PATH=/app/ComfyUI
 
-# Expose port for ComfyUI
+# Expose ports for ComfyUI and RunPod handler
 EXPOSE 8188
+EXPOSE 8000
 
-# Run builder script on container start to download models
-# For RunPod, handler.py will run automatically
-# For local testing, keep the container alive
-CMD ["/bin/bash", "-c", "./builder.sh && python handler.py --rp_serve_api"]
+# Run builder script on container start to download models, then start handler
+CMD ["/bin/bash", "-c", "./builder.sh && python handler.py"]
