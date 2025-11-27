@@ -42,4 +42,4 @@ Thumbs.db
 
 # Custom nodes (manage separately)
 custom_nodes/
-logs.txt
+logs*.txt

@@ -22,10 +22,22 @@ This repository contains a complete RunPod serverless deployment for ComfyUI wit
 
 **You MUST rebuild and redeploy for fixes to take effect!**
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for deployment instructions or run:
+### Quick Deploy:
+
+**Linux / Mac / WSL:**
 ```bash
 ./build_and_deploy.sh
 ```
+
+**Windows (PowerShell):**
+```powershell
+.\build_and_deploy.ps1
+```
+
+**See documentation:**
+- [DEPLOYMENT.md](DEPLOYMENT.md) - General deployment guide
+- [WINDOWS.md](WINDOWS.md) - Windows-specific instructions
+- [QUICKSTART_WINDOWS.md](QUICKSTART_WINDOWS.md) - Quick start for Windows users
 
 ## Quick Start
 

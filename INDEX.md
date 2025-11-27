@@ -21,10 +21,11 @@
    - How to deploy
    - Success criteria
 
-2. **[build_and_deploy.sh](build_and_deploy.sh)** - Interactive deployment script
+2. **[build_and_deploy.sh](build_and_deploy.sh)** / **[build_and_deploy.ps1](build_and_deploy.ps1)** - Interactive deployment script
    - Builds Docker image
    - Pushes to Docker Hub
    - Gives you image name for RunPod
+   - Use `.sh` for Linux/Mac/WSL, `.ps1` for Windows PowerShell
 
 ### For Understanding the Problem
 
@@ -47,7 +48,13 @@
    - RunPod endpoint update
    - Verification steps
 
-2. **[build_and_deploy.sh](build_and_deploy.sh)** - Automated deployment
+2. **[WINDOWS.md](WINDOWS.md)** - Windows-specific deployment guide
+   - PowerShell script usage
+   - Docker Desktop setup
+   - Troubleshooting Windows issues
+   - Alternative methods (GitHub Actions, WSL)
+
+3. **[build_and_deploy.sh](build_and_deploy.sh)** / **[.ps1](build_and_deploy.ps1)** - Automated deployment
    - Interactive prompts
    - Builds and pushes image
    - Provides next steps
@@ -178,6 +185,8 @@
 
 ## 🔧 Quick Commands
 
+### Linux / Mac / WSL
+
 ```bash
 # Deploy
 ./build_and_deploy.sh
@@ -198,6 +207,27 @@ docker push USERNAME/comfyui-hunyuan:latest
 # Test with Docker
 docker run --rm -it --gpus all -p 8188:8188 -p 8000:8000 USERNAME/comfyui-hunyuan:latest
 ```
+
+### Windows (PowerShell)
+
+```powershell
+# Deploy
+.\build_and_deploy.ps1
+
+# Test locally
+python handler.py
+# In another window:
+python test_runpod_local.py sync
+
+# Verify setup
+python verify_setup.py
+
+# Manual build
+docker build -t USERNAME/comfyui-hunyuan:latest .
+docker push USERNAME/comfyui-hunyuan:latest
+```
+
+**See [WINDOWS.md](WINDOWS.md) for detailed Windows instructions.**
 
 ---
 
